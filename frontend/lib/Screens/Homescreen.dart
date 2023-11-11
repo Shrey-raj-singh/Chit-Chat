@@ -23,7 +23,7 @@ class _HomescreenState extends State<Homescreen>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF075E54),
-        title: Text("ChatsApp"),
+        title: Text("Chit-Chat"),
         actions: [
           IconButton(
               onPressed: () {}, icon: Icon(Icons.search)), //Search Button
