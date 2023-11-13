@@ -16,6 +16,8 @@ class VideoViewScreen extends StatefulWidget {
 
 class _VideoViewScreenState extends State<VideoViewScreen> {
   late VideoPlayerController _Videocontroller;
+  String _videoFilePath = "";
+
   @override
   void initState() {
     super.initState();
@@ -25,6 +27,7 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
         setState(() {});
       });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,18 +47,6 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                 Icons.emoji_emotions_outlined,
                 size: 27,
               )),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.title,
-                size: 27,
-              )),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.edit,
-                size: 27,
-              )),
         ],
       ),
       body: Container(
@@ -67,13 +58,13 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height - 150,
               child: _Videocontroller.value.isInitialized
-              ? AspectRatio(
-                  aspectRatio: _Videocontroller.value.aspectRatio,
-                  child: VideoPlayer(_Videocontroller),
-                )
-              : Container(
-                color: Colors.white,
-              ),
+                  ? AspectRatio(
+                      aspectRatio: _Videocontroller.value.aspectRatio,
+                      child: VideoPlayer(_Videocontroller),
+                    )
+                  : Container(
+                      color: Colors.white,
+                    ),
             ),
             Positioned(
               bottom: 0.0,
@@ -97,19 +88,45 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                       suffixIcon: CircleAvatar(
                         backgroundColor: Colors.tealAccent[700],
                         radius: 27,
-                        child: Icon(Icons.check,
-                        color: Colors.white,
-                        size: 27,
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 27,
                         ),
-                      )
-                      ),
-
+                      )),
                 ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: InkWell(
+                onTap: (){
+                  setState(() {
+                    _Videocontroller.value.isPlaying?_Videocontroller.pause():_Videocontroller.play();
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 33,
+                    backgroundColor: Colors.black38,
+                    child: Icon(
+                  _Videocontroller.value.isPlaying
+                      ? Icons.pause
+                      : Icons.play_arrow_rounded,
+                  color: Colors.white,
+                  size: 50,
+                )),
               ),
             )
           ],
         ),
       ),
+    );
+  }
+
+  Widget buildVideoPlayer(String videoPath) {
+    return SizedBox(
+      height: 200,
+      child: VideoPlayer(_Videocontroller),
     );
   }
 }

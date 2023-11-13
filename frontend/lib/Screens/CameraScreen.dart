@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/Screens/CameraViewScreen.dart';
 import 'package:frontend/Screens/VideoView.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
 // import 'package:image/image.dart' as img;
 
 late List<CameraDescription> cameras;
@@ -19,12 +23,19 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _cameraController;
   late Future<void> camerValue;
   bool isRecording = false;
-  String _videoFilePath="";
+  bool flash = false;
+  bool frontcamera = true;
+  double transform = 0;
+
+  String _videoFilePath = "";
+  late VideoPlayerController _videoPlayerController;
   @override
   void initState() {
     super.initState();
     _cameraController = CameraController(cameras[0], ResolutionPreset.max);
     camerValue = _cameraController.initialize();
+    _videoPlayerController = VideoPlayerController.network(
+        ''); // Initialize with an empty network URL
   }
 
   @override
@@ -32,6 +43,7 @@ class _CameraScreenState extends State<CameraScreen> {
     // Dispose of the controller when the widget is disposed.
     super.dispose();
     _cameraController.dispose();
+    _videoPlayerController.dispose();
   }
 
   @override
@@ -66,30 +78,40 @@ class _CameraScreenState extends State<CameraScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.flash_off,
-                            color: Colors.white,
-                            size: 28,
-                          )),
+                        icon: Icon(
+                          flash ? Icons.flash_on : Icons.flash_off,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            flash = !flash;
+                          });
+                          flash
+                              ? _cameraController.setFlashMode(FlashMode.torch)
+                              : _cameraController.setFlashMode(FlashMode.off);
+                        },
+                      ),
                       GestureDetector(
                         onLongPress: () async {
-                          final path = join(
-                            (await getTemporaryDirectory()).path,
-                            '${DateTime.now()}.mp4',
-                          );
-                          ;
-                          await _cameraController.startVideoRecording();
-                          _videoFilePath = path;
-                          setState(() {
-                            isRecording = true;
-                          });
+                          await startVideoRecording();
                         },
                         onLongPressUp: () async {
-                          await _cameraController.stopVideoRecording();
+                          XFile videoFile =
+                              await _cameraController.stopVideoRecording();
                           setState(() {
                             isRecording = false;
-                            Navigator.push(context, MaterialPageRoute(builder: (builder)=>VideoViewScreen(path: _videoFilePath)));
+                            _videoFilePath = videoFile.path;
+                            _videoPlayerController =
+                                VideoPlayerController.file(File(_videoFilePath))
+                                  ..initialize().then((_) {
+                                    _videoPlayerController.play();
+                                  });
+                            Navigator.push(
+                                context as BuildContext,
+                                MaterialPageRoute(
+                                    builder: (builder) =>
+                                        VideoViewScreen(path: _videoFilePath)));
                           });
                         },
                         onTap: () {
@@ -110,12 +132,26 @@ class _CameraScreenState extends State<CameraScreen> {
                               ),
                       ),
                       IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            Icons.flip_camera_ios,
-                            color: Colors.white,
-                            size: 28,
-                          )),
+                          icon: Transform.rotate(
+                            angle: transform,
+                            child: Icon(
+                              Icons.flip_camera_ios,
+                              color: Colors.white,
+                              size: 28,
+                              ),
+                          ),
+                          onPressed: () {
+                              setState(() {
+                                frontcamera =!frontcamera;
+                                transform=transform+pi;
+                              });
+                              int _camerpos = frontcamera?0:1;
+                            _cameraController = CameraController(
+                              cameras[_camerpos],
+                              ResolutionPreset.max);
+                              camerValue = _cameraController.initialize();
+                          },
+                          ),
                     ],
                   ),
                   SizedBox(
@@ -149,5 +185,12 @@ class _CameraScreenState extends State<CameraScreen> {
             builder: (builder) => CameraViewScreen(
                   path: path,
                 )));
+  }
+
+  Future<void> startVideoRecording() async {
+    await _cameraController.startVideoRecording();
+    setState(() {
+      isRecording = true;
+    });
   }
 }
