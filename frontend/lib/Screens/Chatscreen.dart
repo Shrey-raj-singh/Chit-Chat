@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:frontend/Model/ChatModel.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:frontend/Screens/CameraScreen.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({
@@ -188,7 +189,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                             color: Color(0xFF128C7E),
                                           )),
                                       IconButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.push(context, MaterialPageRoute(builder: (builder)=>CameraScreen()));
+                                          },
                                           icon: Icon(
                                             Icons.camera_alt,
                                             color: Color(0xFF128C7E),
