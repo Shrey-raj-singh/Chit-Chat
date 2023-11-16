@@ -2,7 +2,8 @@
     <application
         android:label="Chit Chat"
         android:name="${applicationName}"
-        android:icon="@mipmap/chit_chat">
+        android:icon="@mipmap/chit_chat"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
