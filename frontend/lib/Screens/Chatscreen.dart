@@ -24,10 +24,11 @@ class _ChatScreenState extends State<ChatScreen> {
   bool emojiShowing = false;
   bool isDark = true;
   FocusNode focusNode = FocusNode();
-  IO.Socket socket;
+  late IO.Socket socket;
   @override
   void initState() {
     super.initState();
+    connect();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         setState(() {
@@ -37,7 +38,12 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
   void connect(){
-    socket = IO.io(uri)
+    socket = IO.io("http://192.168.184.170:5000",<String,dynamic>{
+      "transports" : ["websocket"],
+      "autoConnect" : false,
+    });
+  socket.connect();
+  socket.onConnect((data) => print("Connected"));
   }
 
 
